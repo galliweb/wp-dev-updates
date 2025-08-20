@@ -80,7 +80,7 @@ class GalliwebUpdater {
         $this->plugin_file = $plugin_file;
         $this->plugin_slug = plugin_basename($plugin_file);
         $this->version = '1.0'; // Diese Version muss mit der im Header übereinstimmen
-        $this->github_repo = getenv('WP_DEV_UPDATES_GITHUB_REPO') ?: 'galliweb/wp-dev-updates';
+        $this->github_repo = getenv('WP_DEV_UPDATES_GITHUB_REPO') ?: 'example/default-repo';
         
         add_filter('pre_set_site_transient_update_plugins', array($this, 'check_for_update'));
         add_filter('plugins_api', array($this, 'plugin_info'), 20, 3);
@@ -97,8 +97,8 @@ class GalliwebUpdater {
                 'slug' => dirname($this->plugin_slug),
                 'plugin' => $this->plugin_slug,
                 'new_version' => $remote_version,
-                'url' => "https://github.com/{$this->github_repo}",
-                'package' => "https://github.com/{$this->github_repo}/archive/refs/tags/v{$remote_version}.zip"
+                'url' => $this->get_repo_url(),
+                'package' => $this->get_download_url($remote_version)
             );
         }
         
@@ -116,8 +116,8 @@ class GalliwebUpdater {
             'slug' => dirname($this->plugin_slug),
             'version' => $remote_version,
             'author' => 'Galliweb',
-            'homepage' => "https://github.com/{$this->github_repo}",
-            'download_link' => "https://github.com/{$this->github_repo}/archive/refs/tags/v{$remote_version}.zip",
+            'homepage' => $this->get_repo_url(),
+            'download_link' => $this->get_download_url($remote_version),
             'sections' => array(
                 'description' => 'Erweiterte Kontrolle über Update-Benachrichtigungen',
             )
@@ -144,7 +144,7 @@ class GalliwebUpdater {
     }
     
     private function get_remote_version() {
-        $request = wp_remote_get("https://api.github.com/repos/{$this->github_repo}/releases/latest", array(
+        $request = wp_remote_get($this->get_api_url(), array(
             'timeout' => 10,
             'headers' => array(
                 'Accept' => 'application/vnd.github.v3+json',
@@ -161,6 +161,18 @@ class GalliwebUpdater {
         if (!isset($data['tag_name'])) return false;
         
         return ltrim($data['tag_name'], 'v');
+    }
+    
+    private function get_repo_url() {
+        return "https://github.com/" . $this->github_repo;
+    }
+    
+    private function get_api_url() {
+        return "https://api.github.com/repos/" . $this->github_repo . "/releases/latest";
+    }
+    
+    private function get_download_url($version) {
+        return "https://github.com/" . $this->github_repo . "/archive/refs/tags/v" . $version . ".zip";
     }
 }
 
