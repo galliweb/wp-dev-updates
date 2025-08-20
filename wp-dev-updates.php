@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Galliweb Dev Updates
- * Description: Erweiterte Kontrolle über Update-Benachrichtigungen
+ * Description: Erweiterte Kontrolle über Update-Benachrichtigungen 1
  * Version: 1.0
  */
 
