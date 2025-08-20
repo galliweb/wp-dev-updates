@@ -1,13 +1,13 @@
 <?php
 /**
- * Plugin Name: Galliweb Dev Updates
+ * Plugin Name: Galli Web Dev Updates
  * Description: Erweiterte Kontrolle über Update-Benachrichtigungen
  * Version: 1.0
  */
 
 if (!defined('ABSPATH')) exit;
 
-class SelectiveUpdateNotificationsPro {
+class SelectiveUpdateNotifications {
     private $settings;
 
     public function __construct() {
@@ -70,7 +70,7 @@ class SelectiveUpdateNotificationsPro {
     }
 }
 
-class GalliwebUpdater {
+class GwUpdater {
     private $plugin_slug;
     private $version;
     private $github_repo;
@@ -177,5 +177,5 @@ class GalliwebUpdater {
 }
 
 // Plugin initialisieren
-new SelectiveUpdateNotificationsPro();
-new GalliwebUpdater(__FILE__);
+new SelectiveUpdateNotifications();
+new GwUpdater(__FILE__);
