@@ -11,13 +11,28 @@ class SelectiveUpdateNotificationsPro {
     private $settings;
 
     public function __construct() {
+        $this->load_env_vars();
         $this->settings = array(
-            'dev_email' => 'dev@galliweb.ch',
-            'send_on_success' => false,
-            'send_on_fail' => true,
-            'send_on_critical' => true
+            'dev_email' => getenv('WP_DEV_UPDATES_EMAIL') ?: 'admin@example.com',
+            'send_on_success' => filter_var(getenv('WP_DEV_UPDATES_SEND_ON_SUCCESS'), FILTER_VALIDATE_BOOLEAN),
+            'send_on_fail' => filter_var(getenv('WP_DEV_UPDATES_SEND_ON_FAIL'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? true,
+            'send_on_critical' => filter_var(getenv('WP_DEV_UPDATES_SEND_ON_CRITICAL'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? true
         );
         add_action('init', array($this, 'init'));
+    }
+
+    private function load_env_vars() {
+        $env_file = dirname(__FILE__) . '/.env';
+        if (file_exists($env_file)) {
+            $lines = file($env_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            foreach ($lines as $line) {
+                if (strpos(trim($line), '#') === 0) continue;
+                list($name, $value) = explode('=', $line, 2);
+                if (!getenv(trim($name))) {
+                    putenv(trim($name) . '=' . trim($value));
+                }
+            }
+        }
     }
 
     public function init() {
@@ -65,7 +80,7 @@ class GalliwebUpdater {
         $this->plugin_file = $plugin_file;
         $this->plugin_slug = plugin_basename($plugin_file);
         $this->version = '1.0'; // Diese Version muss mit der im Header übereinstimmen
-        $this->github_repo = 'galliweb/wp-dev-updates';
+        $this->github_repo = getenv('WP_DEV_UPDATES_GITHUB_REPO') ?: 'galliweb/wp-dev-updates';
         
         add_filter('pre_set_site_transient_update_plugins', array($this, 'check_for_update'));
         add_filter('plugins_api', array($this, 'plugin_info'), 20, 3);
